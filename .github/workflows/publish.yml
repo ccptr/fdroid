@@ -55,8 +55,20 @@ jobs:
       - name: Unpack the index key
         env:
           FDROID_KEYSTORE_B64: ${{ secrets.FDROID_KEYSTORE_B64 }}
+          SERVERWEBROOT: ${{ vars.FDROID_SERVERWEBROOT }}
+          REPO_URL: ${{ vars.FDROID_REPO_URL }}
         run: |
           set -euo pipefail
+          # An unset secret decodes to an empty file that exists, so the run
+          # would limp on and fail deep inside fdroid instead of saying why.
+          missing=""
+          [ -n "${FDROID_KEYSTORE_B64:-}" ] || missing="$missing FDROID_KEYSTORE_B64"
+          [ -n "${SERVERWEBROOT:-}" ]       || missing="$missing FDROID_SERVERWEBROOT"
+          [ -n "${REPO_URL:-}" ]            || missing="$missing FDROID_REPO_URL"
+          if [ -n "$missing" ]; then
+            echo "::error::not configured yet, missing:$missing"
+            exit 1
+          fi
           umask 077
           printf '%s' "$FDROID_KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/index.p12"
 
