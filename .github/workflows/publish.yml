@@ -75,6 +75,7 @@ jobs:
       - name: Authorise the deploy
         env:
           DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_SSH_KEY_PASS: ${{ secrets.DEPLOY_SSH_KEY_PASS }}
           DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
         run: |
           set -euo pipefail
@@ -83,6 +84,24 @@ jobs:
           printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_ed25519
           # Pin the host key rather than accepting whatever answers.
           printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+          # A passphrase-protected key cannot be used unattended without an
+          # agent. The helper reads the passphrase from the environment, so it
+          # reaches neither argv nor disk.
+          if [ -n "${DEPLOY_SSH_KEY_PASS:-}" ]; then
+            cat > "$RUNNER_TEMP/askpass" <<'EOS'
+          #!/bin/sh
+          printf '%s\n' "$DEPLOY_SSH_KEY_PASS"
+          EOS
+            chmod 700 "$RUNNER_TEMP/askpass"
+            eval "$(ssh-agent -s)" > /dev/null
+            SSH_ASKPASS="$RUNNER_TEMP/askpass" SSH_ASKPASS_REQUIRE=force DISPLAY=:0 \
+              ssh-add ~/.ssh/id_ed25519 < /dev/null
+            rm -f "$RUNNER_TEMP/askpass"
+            # Later steps rsync, so they need the agent too.
+            echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> "$GITHUB_ENV"
+            echo "SSH_AGENT_PID=$SSH_AGENT_PID" >> "$GITHUB_ENV"
+          fi
 
       - name: Pull the published repo down
         env:

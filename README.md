@@ -55,7 +55,8 @@ Secrets:
 |---|---|
 | `FDROID_KEYSTORE_B64` | the index key, `base64 -w0 < index.p12` |
 | `FDROID_KEYSTORE_PASS` | its password |
-| `DEPLOY_SSH_KEY` | private key for `fdroid@fdroid.ccptr.dev`, no passphrase |
+| `DEPLOY_SSH_KEY` | private key for `fdroid@fdroid.ccptr.dev` |
+| `DEPLOY_SSH_KEY_PASS` | its passphrase, if it has one |
 | `DEPLOY_KNOWN_HOSTS` | `ssh-keyscan fdroid.ccptr.dev` output, so the host key is pinned |
 
 Variables:

@@ -1,6 +1,9 @@
-# /srv/fdroid/.ssh/authorized_keys
+# /srv/fdroid/.ssh/authorized_keys  (chown fdroid:fdroid, chmod 600)
+#
+# The restriction is the point. A bare public key here grants a full shell as
+# the fdroid user; with this prefix the key can do exactly one thing, rsync
+# into /srv/fdroid/www, with no shell, no port forwarding and no agent.
 #
 # Read and write, not rrsync -wo: the publish job pulls the repo down before
-# regenerating the index. A leaked key gets rsync into this one directory and
-# no shell.
-command="rrsync /srv/fdroid/www",restrict ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDs0OAupugG5xmoiSp+4/YvTwQGbUKsmp6+mgvXylIcw github-actions -> fdroid.ccptr.dev
+# regenerating the index.
+command="rrsync /srv/fdroid/www",restrict ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJJYHbb61gUXRVcrcLWvAkbO5aLJn16ZC3lhlhm7bsyy dev@desktop
