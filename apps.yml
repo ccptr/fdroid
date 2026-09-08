@@ -18,15 +18,16 @@
 #
 # An empty signer means "not pinned yet" and is accepted with a warning. Fill
 # it in as soon as the app's key exists: it is the only thing standing between
-# a compromised app repository and a malicious APK in this index.
+# a compromised app repository and a malicious APK in this index. The digests
+# below match tools/signer.sha256 and tools/signer-nightly.sha256 in ccptr/snot.
 
 apps:
   - id: app.snot.notes
     repo: ccptr/snot
     release: latest
-    signer: ""
+    signer: "0d1d9c2b3cf424d394e7e71a6ed8691ead530a906f07820c257d0e19e7dba3a1"
 
   - id: app.snot.notes.nightly
     repo: ccptr/snot
     release: nightly
-    signer: ""
+    signer: "d0929ec15bddefd13f72b1869ca202c04583933ba3078dc1b272de43e6dc3447"
