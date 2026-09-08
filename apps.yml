@@ -1,0 +1,32 @@
+# The apps collected into this F-Droid repository.
+#
+# Each entry names a GitHub repository and which release to take the APK from.
+# An app repository's only obligation is to publish a signed APK named
+# <applicationId>_<versionCode>.apk as a release asset; how it builds and signs
+# that APK is its own business, which is what lets apps of different stacks
+# share this repo.
+#
+#   release: latest    the newest non-prerelease
+#   release: <tag>     a specific tag, typically a rolling one like `nightly`
+#
+# signer is the SHA-256 of the certificate the app is signed with, lowercase
+# hex without colons. It is checked before an APK is accepted and written into
+# the metadata as AllowedAPKSigningKeys, so fdroid enforces it too. Get it with:
+#
+#   keytool -list -v -keystore <key>.p12 -alias <alias> \
+#     | sed -n 's/.*SHA256: //p' | tr -d ':' | tr 'A-Z' 'a-z'
+#
+# An empty signer means "not pinned yet" and is accepted with a warning. Fill
+# it in as soon as the app's key exists: it is the only thing standing between
+# a compromised app repository and a malicious APK in this index.
+
+apps:
+  - id: app.snot.notes
+    repo: ccptr/snot
+    release: latest
+    signer: ""
+
+  - id: app.snot.notes.nightly
+    repo: ccptr/snot
+    release: nightly
+    signer: ""
