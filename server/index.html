@@ -34,6 +34,8 @@
   ul.apps li { padding: .6rem 0; border-top: 1px solid var(--line) }
   ul.apps li:first-child { border-top: 0 }
   .name { font-weight: 600 }
+  .ver { color: var(--muted); font-size: .8125rem; margin-top: .15rem }
+  .msg { color: var(--muted); font-size: .875rem }
   .id { color: var(--muted); font-size: .8125rem }
   footer { color: var(--muted); font-size: .8125rem; margin-top: 2rem }
 </style>
@@ -60,13 +62,61 @@
   </div>
 
   <div class="card">
-    <ul class="apps">
-      <li><span class="name">Snot</span> — open source notes with rich text and
-        stylus ink<br><span class="id">app.snot.notes</span></li>
-      <li><span class="name">Snot Nightly</span> — built from the latest commit,
-        installs alongside the release<br><span class="id">app.snot.notes.nightly</span></li>
-    </ul>
+    <ul class="apps" id="apps"><li class="msg">Loading the app list…</li></ul>
+    <noscript><p class="msg">The app list is read from the repository index,
+      which needs JavaScript. Adding the repository in F-Droid does not.</p></noscript>
   </div>
+
+<script>
+// Read the published index rather than a hand-kept list: the page then cannot
+// claim an app that is not there, or miss one that is.
+(function () {
+  var el = document.getElementById('apps');
+  var loc = function (v) {
+    if (typeof v === 'string') return v;
+    if (!v || typeof v !== 'object') return '';
+    return v['en-US'] || v[Object.keys(v)[0]] || '';
+  };
+  var mb = function (n) { return (n / 1048576).toFixed(1) + ' MB'; };
+  var esc = function (s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  };
+  var say = function (m) { el.innerHTML = '<li class="msg">' + esc(m) + '</li>'; };
+
+  fetch('repo/index-v2.json', { cache: 'no-cache' })
+    .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function (d) {
+      var apps = Object.keys(d.packages || {}).map(function (id) {
+        var p = d.packages[id] || {};
+        var vs = Object.keys(p.versions || {}).map(function (k) { return p.versions[k]; });
+        vs.sort(function (a, b) {
+          return ((b.manifest || {}).versionCode || 0) - ((a.manifest || {}).versionCode || 0);
+        });
+        return { id: id, meta: p.metadata || {}, v: vs[0] };
+      }).filter(function (a) { return a.v; });
+
+      if (!apps.length) { say('No apps published yet.'); return; }
+
+      apps.sort(function (a, b) {
+        return (loc(a.meta.name) || a.id).localeCompare(loc(b.meta.name) || b.id);
+      });
+
+      el.innerHTML = apps.map(function (a) {
+        var m = a.v.manifest || {}, f = a.v.file || {};
+        var href = 'repo' + (f.name || '');
+        return '<li><span class="name">' + esc(loc(a.meta.name) || a.id) + '</span>' +
+          (loc(a.meta.summary) ? ' \u2014 ' + esc(loc(a.meta.summary)) : '') +
+          '<br><span class="id">' + esc(a.id) + '</span>' +
+          '<div class="ver">' + esc(m.versionName || '') +
+          ' \u00b7 <a href="' + esc(href) + '">APK</a>' +
+          (f.size ? ' \u00b7 ' + mb(f.size) : '') + '</div></li>';
+      }).join('');
+    })
+    .catch(function (e) { say('Could not read the app list (' + e.message + ').'); });
+})();
+</script>
 
   <footer>
     Built and published from
