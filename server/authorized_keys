@@ -1,0 +1,6 @@
+# /srv/fdroid/.ssh/authorized_keys
+#
+# Read and write, not rrsync -wo: the publish job pulls the repo down before
+# regenerating the index. A leaked key gets rsync into this one directory and
+# no shell.
+command="rrsync /srv/fdroid/www",restrict ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDs0OAupugG5xmoiSp+4/YvTwQGbUKsmp6+mgvXylIcw github-actions -> fdroid.ccptr.dev

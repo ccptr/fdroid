@@ -55,8 +55,8 @@ Secrets:
 |---|---|
 | `FDROID_KEYSTORE_B64` | the index key, `base64 -w0 < index.p12` |
 | `FDROID_KEYSTORE_PASS` | its password |
-| `DEPLOY_SSH_KEY` | private key for `fdroid@<host>`, no passphrase |
-| `DEPLOY_KNOWN_HOSTS` | `ssh-keyscan <host>` output, so the host key is pinned |
+| `DEPLOY_SSH_KEY` | private key for `fdroid@fdroid.ccptr.dev`, no passphrase |
+| `DEPLOY_KNOWN_HOSTS` | `ssh-keyscan fdroid.ccptr.dev` output, so the host key is pinned |
 
 Variables:
 
@@ -64,9 +64,9 @@ Variables:
 |---|---|
 | `FDROID_KEY_ALIAS` | index key alias |
 | `FDROID_REPO_NAME` | display name |
-| `FDROID_REPO_URL` | `https://<host>/fdroid/repo` |
-| `FDROID_ARCHIVE_URL` | `https://<host>/fdroid/archive` |
-| `FDROID_SERVERWEBROOT` | `fdroid@<host>:/srv/fdroid/fdroid/` |
+| `FDROID_REPO_URL` | `https://fdroid.ccptr.dev/repo` |
+| `FDROID_ARCHIVE_URL` | `https://fdroid.ccptr.dev/archive` |
+| `FDROID_SERVERWEBROOT` | `fdroid@fdroid.ccptr.dev:/srv/fdroid/www/` |
 
 `GH_TOKEN` for collecting assets is the workflow's own token, which is enough
 for public app repositories. A private one needs a PAT with `contents:read`.
@@ -77,16 +77,19 @@ Static files only; nothing executes there and no key lives there.
 
 ```sh
 sudo useradd -r -m -d /srv/fdroid -s /bin/bash fdroid
-sudo install -d -o fdroid -g fdroid /srv/fdroid/fdroid
+sudo install -d -o fdroid -g fdroid /srv/fdroid/www
 sudo pacman -S nginx-mainline certbot certbot-nginx rsync
-sudo certbot --nginx -d <host>
+sudo certbot --nginx -d fdroid.ccptr.dev
 ```
 
-nginx wants `root /srv/fdroid;` and `autoindex off;`. Restrict the deploy key in
+nginx wants `root /srv/fdroid/www;` and `autoindex off;`, so the repo is served
+at `/repo` rather than `/fdroid/repo` — the extra segment is for repos living
+under a general site, and f-droid.org itself serves `/repo`. Restrict the deploy
+key in
 `/srv/fdroid/.ssh/authorized_keys`:
 
 ```
-command="rrsync /srv/fdroid/fdroid",restrict ssh-ed25519 AAAA... deploy
+command="rrsync /srv/fdroid/www",restrict ssh-ed25519 AAAA... deploy
 ```
 
 Read **and** write, not `rrsync -wo`: the publish job pulls the repo down before
@@ -95,7 +98,7 @@ regenerating the index.
 ## Users add the repo as
 
 ```
-https://<host>/fdroid/repo?fingerprint=<sha256 of the index certificate>
+https://fdroid.ccptr.dev/repo?fingerprint=<sha256 of the index certificate>
 ```
 
 ```sh
