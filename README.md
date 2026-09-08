@@ -80,6 +80,11 @@ sudo useradd -r -m -d /srv/fdroid -s /bin/bash fdroid
 sudo install -d -o fdroid -g fdroid /srv/fdroid/web /srv/fdroid/web/fdroid
 sudo pacman -S nginx-mainline certbot certbot-nginx rsync
 sudo certbot --nginx -d fdroid.ccptr.dev
+
+# useradd creates the home 0700, which nginx cannot traverse: every request
+# 403s, including for world-readable files. 711 lets it through to the web
+# root without making the home listable, and leaves .ssh at 700.
+sudo chmod 711 /srv/fdroid
 ```
 
 nginx wants `root /srv/fdroid/web/fdroid;` and `autoindex off;`, so the repo is served
