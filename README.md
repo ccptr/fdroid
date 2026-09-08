@@ -114,10 +114,15 @@ so `host:` becomes `host:/` and is refused. The final path segment has to be
 ## Users add the repo as
 
 ```
-https://fdroid.ccptr.dev/repo?fingerprint=<sha256 of the index certificate>
+https://fdroid.ccptr.dev/repo?fingerprint=5ecb45ba6fe32f443a31fd98b9bc535c2d1077dbea566684e826cc817662259a
 ```
 
+That is the SHA-256 of the index signing certificate. A client pins it on the
+day it adds the repo and checks it on every refresh, so it can never change:
+replacing the index key means every user has to remove the repo and add it
+again. Derive it from the keystore with:
+
 ```sh
-keytool -list -v -keystore index.p12 -alias index \
+keytool -list -v -keystore ~/keys/snot-index.p12 -alias index \
   | sed -n 's/.*SHA256: //p' | tr -d ':' | tr 'A-Z' 'a-z'
 ```
