@@ -57,7 +57,6 @@ Secrets:
 | `FDROID_KEYSTORE_PASS` | its password |
 | `DEPLOY_SSH_KEY` | private key for `fdroid@fdroid.ccptr.dev` |
 | `DEPLOY_SSH_KEY_PASS` | its passphrase, if it has one |
-| `DEPLOY_KNOWN_HOSTS` | `ssh-keyscan fdroid.ccptr.dev` output, so the host key is pinned |
 
 Variables:
 
@@ -67,7 +66,7 @@ Variables:
 | `FDROID_REPO_NAME` | display name |
 | `FDROID_REPO_URL` | `https://fdroid.ccptr.dev/repo` |
 | `FDROID_ARCHIVE_URL` | `https://fdroid.ccptr.dev/archive` |
-| `FDROID_SERVERWEBROOT` | `fdroid@fdroid.ccptr.dev:/srv/fdroid/www/` |
+| `FDROID_SERVERWEBROOT` | `fdroid@fdroid.ccptr.dev:fdroid/` |
 
 `GH_TOKEN` for collecting assets is the workflow's own token, which is enough
 for public app repositories. A private one needs a PAT with `contents:read`.
@@ -78,23 +77,32 @@ Static files only; nothing executes there and no key lives there.
 
 ```sh
 sudo useradd -r -m -d /srv/fdroid -s /bin/bash fdroid
-sudo install -d -o fdroid -g fdroid /srv/fdroid/www
+sudo install -d -o fdroid -g fdroid /srv/www /srv/www/fdroid
 sudo pacman -S nginx-mainline certbot certbot-nginx rsync
 sudo certbot --nginx -d fdroid.ccptr.dev
 ```
 
-nginx wants `root /srv/fdroid/www;` and `autoindex off;`, so the repo is served
+nginx wants `root /srv/www/fdroid;` and `autoindex off;`, so the repo is served
 at `/repo` rather than `/fdroid/repo` — the extra segment is for repos living
 under a general site, and f-droid.org itself serves `/repo`. Restrict the deploy
 key in
 `/srv/fdroid/.ssh/authorized_keys`:
 
 ```
-command="rrsync /srv/fdroid/www",restrict ssh-ed25519 AAAA... deploy
+command="rrsync /srv/www",restrict ssh-ed25519 AAAA... deploy
 ```
 
 Read **and** write, not `rrsync -wo`: the publish job pulls the repo down before
-regenerating the index.
+regenerating the index, and `fdroid deploy` rsyncs with `--delete-after`.
+
+The rrsync root is `/srv/www`, deliberately not the `fdroid` user's home — rooted
+at the home directory the key could rewrite `~/.ssh/authorized_keys` and grant
+itself a shell.
+
+`serverwebroot` must be a **relative** path (`host:fdroid/`). rrsync rejects an
+absolute one, and fdroidserver appends a trailing slash to whatever you give it,
+so `host:` becomes `host:/` and is refused. The final path segment has to be
+`fdroid` or fdroidserver exits on its own `standardwebroot` check.
 
 ## Users add the repo as
 

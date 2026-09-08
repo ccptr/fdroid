@@ -2,8 +2,12 @@
 #
 # The restriction is the point. A bare public key here grants a full shell as
 # the fdroid user; with this prefix the key can do exactly one thing, rsync
-# into /srv/fdroid/www, with no shell, no port forwarding and no agent.
+# under /srv/www, with no shell, no port forwarding and no agent.
+#
+# The rrsync root is /srv/www and NOT the fdroid user's home: rooted at the
+# home directory, this key could overwrite ~/.ssh/authorized_keys itself and
+# hand its holder a shell.
 #
 # Read and write, not rrsync -wo: the publish job pulls the repo down before
-# regenerating the index.
-command="rrsync /srv/fdroid/www",restrict ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJJYHbb61gUXRVcrcLWvAkbO5aLJn16ZC3lhlhm7bsyy dev@desktop
+# regenerating the index, and fdroid deploy rsyncs with --delete-after.
+command="rrsync /srv/www",restrict ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJJYHbb61gUXRVcrcLWvAkbO5aLJn16ZC3lhlhm7bsyy dev@desktop
