@@ -117,6 +117,22 @@ so `host:` becomes `host:/` and is refused. The final path segment has to be
 https://fdroid.ccptr.dev/repo?fingerprint=5ecb45ba6fe32f443a31fd98b9bc535c2d1077dbea566684e826cc817662259a
 ```
 
+<img src="repo-qr.svg" alt="QR code to add the repository to F-Droid" width="220">
+
+In F-Droid: **Settings → Repositories → +**, then scan. The QR carries the
+fingerprint as well as the URL, so the client pins the right key on the way in
+rather than trusting whatever the host later serves.
+
+`repo-qr.svg` is generated from the URL above and decodes back to it exactly:
+
+```sh
+qrencode -t SVG -o repo-qr.svg -l M -m 2 "$URL"
+rsvg-convert -w 600 repo-qr.svg -o /tmp/qr.png && zbarimg --quiet --raw /tmp/qr.png
+```
+
+Regenerate it if the URL or the fingerprint ever changes — a stale QR silently
+adds a repo nobody can update.
+
 That is the SHA-256 of the index signing certificate. A client pins it on the
 day it adds the repo and checks it on every refresh, so it can never change:
 replacing the index key means every user has to remove the repo and add it
