@@ -1,0 +1,75 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ccptr's F-Droid repository</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #fbfaf8; --fg: #1c1b19; --muted: #5f5c56;
+    --line: #e2ded6; --card: #fff; --accent: #2f6f4f;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #16181a; --fg: #e8e6e3; --muted: #9c9892;
+            --line: #2c2f33; --card: #1d2023; --accent: #79c39b; }
+  }
+  * { box-sizing: border-box }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+         font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+         display: flex; justify-content: center; padding: 2.5rem 1.25rem }
+  main { width: 100%; max-width: 34rem }
+  h1 { font-size: 1.5rem; margin: 0 0 .25rem }
+  p.sub { color: var(--muted); margin: 0 0 2rem }
+  .card { background: var(--card); border: 1px solid var(--line);
+          border-radius: 12px; padding: 1.25rem; margin-bottom: 1.25rem }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .8125rem }
+  .url { display: block; word-break: break-all; color: var(--muted);
+         border: 1px solid var(--line); border-radius: 8px;
+         padding: .625rem .75rem; margin-top: .75rem; background: var(--bg) }
+  img.qr { display: block; width: 200px; height: 200px; margin: 0 auto;
+           background: #fff; padding: 8px; border-radius: 8px }
+  a { color: var(--accent) }
+  ol { padding-left: 1.25rem; margin: 0 }
+  li + li { margin-top: .35rem }
+  ul.apps { list-style: none; padding: 0; margin: 0 }
+  ul.apps li { padding: .6rem 0; border-top: 1px solid var(--line) }
+  ul.apps li:first-child { border-top: 0 }
+  .name { font-weight: 600 }
+  .id { color: var(--muted); font-size: .8125rem }
+  footer { color: var(--muted); font-size: .8125rem; margin-top: 2rem }
+</style>
+<main>
+  <h1>ccptr's F-Droid repository</h1>
+  <p class="sub">Self-hosted Android app builds.</p>
+
+  <div class="card">
+    <img class="qr" src="repo-qr.svg" alt="QR code to add this repository">
+    <code class="url">https://fdroid.ccptr.dev/repo?fingerprint=5ecb45ba6fe32f443a31fd98b9bc535c2d1077dbea566684e826cc817662259a</code>
+  </div>
+
+  <div class="card">
+    <ol>
+      <li>Install <a href="https://f-droid.org">F-Droid</a>.</li>
+      <li>Open <strong>Settings → Repositories → +</strong>.</li>
+      <li>Scan the code above, or paste the URL.</li>
+    </ol>
+    <p style="margin:.9rem 0 0;color:var(--muted);font-size:.875rem">
+      The link carries a fingerprint, so your client pins this repository's
+      signing key when it is added and refuses anything signed differently
+      later. Adding it by hostname alone would skip that check.
+    </p>
+  </div>
+
+  <div class="card">
+    <ul class="apps">
+      <li><span class="name">Snot</span> — open source notes with rich text and
+        stylus ink<br><span class="id">app.snot.notes</span></li>
+      <li><span class="name">Snot Nightly</span> — built from the latest commit,
+        installs alongside the release<br><span class="id">app.snot.notes.nightly</span></li>
+    </ul>
+  </div>
+
+  <footer>
+    Built and published from
+    <a href="https://github.com/ccptr/fdroid">github.com/ccptr/fdroid</a>.
+  </footer>
+</main>

@@ -164,6 +164,13 @@ jobs:
           fdroid update
           fdroid deploy
 
+      # fdroid deploy only syncs repo/ and archive/, so the landing page at the
+      # web root is ours to place and is never touched by --delete-after.
+      - name: Publish the landing page
+        env:
+          SERVERWEBROOT: ${{ vars.FDROID_SERVERWEBROOT }}
+        run: rsync -a server/index.html repo-qr.svg "$SERVERWEBROOT"
+
       - name: Destroy the keys
         if: always()
         run: shred -u "$RUNNER_TEMP/index.p12" ~/.ssh/id_ed25519 "$RUNNER_TEMP/fdroid/config.yml" 2>/dev/null || true
