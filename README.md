@@ -77,27 +77,29 @@ Static files only; nothing executes there and no key lives there.
 
 ```sh
 sudo useradd -r -m -d /srv/fdroid -s /bin/bash fdroid
-sudo install -d -o fdroid -g fdroid /srv/www /srv/www/fdroid
+sudo install -d -o fdroid -g fdroid /srv/fdroid/web /srv/fdroid/web/fdroid
 sudo pacman -S nginx-mainline certbot certbot-nginx rsync
 sudo certbot --nginx -d fdroid.ccptr.dev
 ```
 
-nginx wants `root /srv/www/fdroid;` and `autoindex off;`, so the repo is served
+nginx wants `root /srv/fdroid/web/fdroid;` and `autoindex off;`, so the repo is served
 at `/repo` rather than `/fdroid/repo` — the extra segment is for repos living
 under a general site, and f-droid.org itself serves `/repo`. Restrict the deploy
 key in
 `/srv/fdroid/.ssh/authorized_keys`:
 
 ```
-command="rrsync /srv/www",restrict ssh-ed25519 AAAA... deploy
+command="rrsync /srv/fdroid/web",restrict ssh-ed25519 AAAA... deploy
 ```
 
 Read **and** write, not `rrsync -wo`: the publish job pulls the repo down before
 regenerating the index, and `fdroid deploy` rsyncs with `--delete-after`.
 
-The rrsync root is `/srv/www`, deliberately not the `fdroid` user's home — rooted
-at the home directory the key could rewrite `~/.ssh/authorized_keys` and grant
-itself a shell.
+The rrsync root is `/srv/fdroid/web` — a subdirectory, deliberately not
+`/srv/fdroid`, which is the user's home. rrsync blocks only `..` and pins its
+root; it has no protection for dotfiles. Rooted at the home, the key could
+overwrite `~/.ssh/authorized_keys`, or drop a `~/.bashrc`, which the forced
+command executes because bash reads it when sshd runs it non-interactively.
 
 `serverwebroot` must be a **relative** path (`host:fdroid/`). rrsync rejects an
 absolute one, and fdroidserver appends a trailing slash to whatever you give it,

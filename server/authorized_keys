@@ -4,10 +4,13 @@
 # the fdroid user; with this prefix the key can do exactly one thing, rsync
 # under /srv/www, with no shell, no port forwarding and no agent.
 #
-# The rrsync root is /srv/www and NOT the fdroid user's home: rooted at the
-# home directory, this key could overwrite ~/.ssh/authorized_keys itself and
-# hand its holder a shell.
+# The root is /srv/fdroid/web, a subdirectory, and NOT /srv/fdroid itself --
+# that is the fdroid user's home. rrsync has no protection for dotfiles (it
+# blocks only ".." and pins the root), so rooted at the home this key could
+# overwrite ~/.ssh/authorized_keys, or write ~/.bashrc, which sshd's forced
+# command executes because bash reads it when run non-interactively over a
+# network connection. Either one turns rsync access into a shell.
 #
 # Read and write, not rrsync -wo: the publish job pulls the repo down before
 # regenerating the index, and fdroid deploy rsyncs with --delete-after.
-command="rrsync /srv/www",restrict ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJJYHbb61gUXRVcrcLWvAkbO5aLJn16ZC3lhlhm7bsyy dev@desktop
+command="rrsync /srv/fdroid/web",restrict ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJJYHbb61gUXRVcrcLWvAkbO5aLJn16ZC3lhlhm7bsyy dev@desktop
