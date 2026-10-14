@@ -28,10 +28,19 @@ single repo owning the deploy can serialize it.
 ## Adding an app
 
 1. Add an entry to `apps.yml` and a `metadata/<applicationId>.yml`.
-2. Have the app publish a signed APK named `<applicationId>_<versionCode>.apk`
-   as a release asset. That filename is the whole contract — the app can be
-   built with anything.
+2. Have the app attach its signed APKs to a GitHub release — any names, one
+   per ABI if it splits them. That is the whole contract — the app can be
+   built with anything. An APK whose package is not the entry's `id` is
+   refused.
 3. Fill in `signer` once the app's signing key exists.
+
+## Removing an app
+
+Delete its entry from `apps.yml` and its `metadata/` file. The next publish
+deletes everything it left on the server — APKs in `repo/` and `archive/`,
+icons and the index entry — because `tools/collect.py` prunes any app not
+listed, and `fdroid deploy` rsyncs with `--delete-after`. Clients that
+installed it keep the installed copy, but never see an update again.
 
 `signer` is checked before an APK is accepted, and written into the metadata as
 `AllowedAPKSigningKeys` so fdroid enforces it too. An empty `signer` is accepted
@@ -42,10 +51,11 @@ in this index.
 ## Triggers
 
 - `repository_dispatch` with `event_type: publish` — how an app repo asks for
-  an immediate publish after a release. Needs a token with access here.
-- Every six hours — the safety net for apps that cannot dispatch, and how a
-  release published during an outage eventually lands.
-- Manually, from the Actions tab.
+  a publish after a release. Needs a token with Contents: write here.
+- Manually, from the Actions tab or `gh workflow run publish.yml -R ccptr/fdroid`.
+
+Nothing runs on a schedule, so a release whose dispatch failed is not picked
+up until one of these runs.
 
 ## Settings
 

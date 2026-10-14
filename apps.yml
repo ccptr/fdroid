@@ -1,10 +1,11 @@
 # The apps collected into this F-Droid repository.
 #
 # Each entry names a GitHub repository and which release to take the APK from.
-# An app repository's only obligation is to publish a signed APK named
-# <applicationId>_<versionCode>.apk as a release asset; how it builds and signs
-# that APK is its own business, which is what lets apps of different stacks
-# share this repo.
+# An app repository's only obligation is to attach its signed APKs to the
+# release, under any name and one per ABI if it splits them; every .apk asset
+# is taken, and one whose package is not the entry's id is refused. How it
+# builds and signs them is its own business, which is what lets apps of
+# different stacks share this repo.
 #
 #   release: latest    the newest non-prerelease
 #   release: <tag>     a specific tag, typically a rolling one like `nightly`
@@ -18,16 +19,13 @@
 #
 # An empty signer means "not pinned yet" and is accepted with a warning. Fill
 # it in as soon as the app's key exists: it is the only thing standing between
-# a compromised app repository and a malicious APK in this index. The digests
-# below match tools/signer.sha256 and tools/signer-nightly.sha256 in ccptr/snot.
+# a compromised app repository and a malicious APK in this index.
+#
+# This list is the whole repository: an app that is not here is deleted from
+# the server, APKs, archive and all, on the next publish.
 
 apps:
-  - id: app.snot.notes
+  - id: dev.ccptr.Snot
     repo: ccptr/snot
     release: latest
     signer: "0d1d9c2b3cf424d394e7e71a6ed8691ead530a906f07820c257d0e19e7dba3a1"
-
-  - id: app.snot.notes.nightly
-    repo: ccptr/snot
-    release: nightly
-    signer: "d0929ec15bddefd13f72b1869ca202c04583933ba3078dc1b272de43e6dc3447"

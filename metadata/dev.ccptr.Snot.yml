@@ -1,0 +1,26 @@
+Categories:
+  - Writing
+License: GPL-3.0-or-later
+AuthorName: ccptr
+SourceCode: https://github.com/ccptr/snot
+IssueTracker: https://github.com/ccptr/snot/issues
+Changelog: https://github.com/ccptr/snot/releases
+
+Name: Snot
+Summary: Notes that mix typed text and handwriting on the same page
+Description: |-
+  Snot is a notes app in the spirit of Samsung Notes: typed text and
+  handwriting share one page, and writing stays where you put it relative to
+  the words.
+
+  * Text with headings, quotes, code, bulleted, numbered and checklists, and the usual bold, italic, underline, strikethrough, highlight and colour.
+  * Handwriting anywhere on the page with pen, marker and highlighter, a stroke eraser, and plain, lined, grid or dotted paper. A stylus always draws; fingers draw in pen mode, with two fingers to scroll.
+  * Low-latency ink: on Android 10 and newer the stroke being written goes straight to a front-buffered layer.
+  * Pictures, folders, favourites, pinning, note colours, full-text search, undo and redo, and a trash that keeps deleted notes for 30 days.
+  * Markdown sharing and import, so your notes are never locked in.
+
+  Everything stays on the device, in a SQLite library you own. There is no
+  account and no network access.
+
+  This is an alpha: expect rough edges, and keep a copy of anything you
+  cannot afford to lose.

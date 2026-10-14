@@ -6,6 +6,10 @@ belong in the index, so it is where the signing certificate is checked. An APK
 whose signer does not match the pin in apps.yml never reaches the repo, and the
 pin is also written into the metadata as AllowedAPKSigningKeys so that fdroid
 enforces it independently of this script.
+
+It is also where an app leaves: anything in the published repo or archive that
+belongs to an app no longer in apps.yml is deleted here, and fdroid deploy's
+--delete-after then deletes it from the server.
 """
 
 from __future__ import annotations
@@ -17,6 +21,7 @@ import sys
 from pathlib import Path
 
 import yaml
+from fdroidserver.common import get_apk_id
 
 
 def run(cmd: list[str], **kw) -> subprocess.CompletedProcess:
@@ -31,6 +36,24 @@ def signer_digest(apksigner: str, apk: Path) -> str:
         if line.startswith(prefix):
             return line[len(prefix):].strip()
     raise SystemExit(f"could not read a signer certificate from {apk.name}")
+
+
+def prune(section: Path, keep: set[str]) -> None:
+    """Delete every trace of an app that apps.yml no longer lists."""
+    gone = set()
+    for apk in sorted(section.glob("*.apk")):
+        app_id = get_apk_id(str(apk))[0]
+        if app_id in keep:
+            continue
+        gone.add(app_id)
+        # The APK and anything fdroid keeps beside it, such as a signature.
+        for f in section.glob(apk.stem + ".*"):
+            f.unlink()
+        print(f"removed {section.name}/{apk.name} ({app_id} is not in apps.yml)")
+    for app_id in gone:
+        shutil.rmtree(section / app_id, ignore_errors=True)
+        for icon in section.glob(f"icons*/{app_id}.*"):
+            icon.unlink()
 
 
 def download(app: dict, into: Path) -> list[Path]:
@@ -65,11 +88,21 @@ def main() -> int:
     repo_dir.mkdir(parents=True, exist_ok=True)
     meta_dir.mkdir(parents=True, exist_ok=True)
 
+    listed = {app["id"] for app in apps}
+    for section in (repo_dir, args.work / "archive"):
+        if section.is_dir():
+            prune(section, listed)
+
     failures = []
     for app in apps:
         app_id, pin = app["id"], (app.get("signer") or "").strip().lower()
 
         for apk in download(app, repo_dir):
+            package = get_apk_id(str(apk))[0]
+            if package != app_id:
+                apk.unlink()
+                failures.append(f"{app_id}: {apk.name} is the package {package}")
+                continue
             got = signer_digest(args.apksigner, apk).lower()
             if not pin:
                 print(f"warning: {app_id} is not pinned; accepting signer {got}")
