@@ -16,10 +16,6 @@ on:
   repository_dispatch:
     types: [publish]
   workflow_dispatch:
-  schedule:
-    # A safety net for app repos that cannot send a dispatch, and a way to
-    # notice a release that was published while this was failing.
-    - cron: "17 */6 * * *"
 
 permissions:
   contents: read
@@ -39,10 +35,10 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3.2.2
-
+      # The runner image ships the Android SDK. setup-android is not used: by
+      # default it installs the long-removed "tools" package, which now fails.
       - name: Install apksigner
-        run: sdkmanager --install "build-tools;36.0.0"
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "build-tools;36.0.0" > /dev/null
 
       - name: Install fdroidserver
         run: |
@@ -144,7 +140,9 @@ jobs:
               "repo_url": os.environ["REPO_URL"],
               "repo_name": os.environ["REPO_NAME"],
               "archive_url": os.environ["ARCHIVE_URL"],
-              "archive_older": 3,
+              # Counted in APKs, not releases: three releases of an app
+              # split into two ABIs.
+              "archive_older": 6,
               "serverwebroot": os.environ["SERVERWEBROOT"],
               "keystore": os.path.join(os.environ["RUNNER_TEMP"], "index.p12"),
               "repo_keyalias": os.environ["KEY_ALIAS"],
